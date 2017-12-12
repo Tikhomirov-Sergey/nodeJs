@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="../../main.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row" id="users">
+
+    </div>
+</div>
+
+<script>
+'use strict';
+
+    class Card {
+
+        constructor() {
+            this.clickButtonEdit = this.clickButtonEdit.bind(this);
+            this.clickButtonSave = this.clickButtonSave.bind(this);
+        }
+
+        createCard(id, name, parent) {
+            let mainDiv = this.createMainDiv(id);
+
+            let cardBody = this.createCardBody();
+            let cardTitle = $('<h4>').addClass('card-title').text(name);
+
+            let buttonDelete = this.createButton("Удалить", deleteUser).attr("id", "delete");
+            let buttonEdit = this.createButton("Изменить", this.clickButtonEdit).attr("id", "edit");
+
+            cardBody.append(cardTitle);
+            cardBody.append(buttonDelete);
+            cardBody.append(buttonEdit);
+            mainDiv.append(cardBody);
+
+            parent.append(mainDiv);
+        }
+
+        createFormAddUser(parent) {
+
+            let mainDiv = this.createMainDiv(0);
+            let cardBody = this.createCardBody();
+            let input = this.createInput();
+
+            let buttonAdd = this.createButton("Добавить", addUser);
+
+            cardBody.append(input);
+            cardBody.append(buttonAdd);
+            mainDiv.append(cardBody);
+
+            parent.append(mainDiv);
+        }
+
+        createMainDiv(id) {
+            return $('<div>').addClass("card col-4").css({
+                margin:"10px",
+                width:"20px"
+            }).attr("id", id);
+        }
+
+        createCardBody() {
+            return $('<div>').addClass("card-body");
+        }
+
+        createInput() {
+            let divInput = $('<div>').addClass('form-group');
+            let input = $('<input>').addClass('form-control');
+
+            divInput.append(input);
+
+            return divInput;
+        }
+
+        createButton (name, click) {
+
+            let button = $('<a>').addClass("btn btn-primary").text(name).attr("href", "#").css("margin-left", "10px");
+            button.on('click', click);
+
+            return button;
+        }
+
+        clickButtonEdit(event) {
+            let mainDiv = $(event.target).parents('.card');
+
+            let title = mainDiv.find('.card-title').css("display", "none");
+            let name = title.text();
+
+            let input = this.createInput();
+            input.find('input').val(name);
+
+            let buttonSave = this.createButton("Сохранить", this.clickButtonSave).attr("id", "save");
+            mainDiv.find('#edit').remove();
+
+            mainDiv.find('.card-body').prepend(input).append(buttonSave);
+        }
+
+        clickButtonSave(event) {
+            let mainDiv = $(event.target).parents('.card');
+
+            let input = mainDiv.find('input');
+
+            let id = mainDiv.attr("id");
+            let name = input.val();
+
+            mainDiv.find('.form-group').css("display", "none");
+
+            let title = mainDiv.find('.card-title').text(name).css("display", "block");
+
+            let buttonEdit = this.createButton("Изменить", this.clickButtonEdit).attr("id", "edit");
+            mainDiv.find('#save').remove();
+
+            mainDiv.find('.card-body').append(buttonEdit);
+
+            editUser(id, name);
+        }
+    }
+
+  $(() => {
+      getCard();
+  });
+
+
+    let getCard = () => {
+        $.ajax({
+            url: 'api/v1/users',
+            success: function(result) {
+                let card = new Card();
+                let users = $('#users');
+
+                    card.createFormAddUser(users);
+
+                result.forEach((item) => {
+                    card.createCard(item.id, item.name, users)
+                })
+            }
+        });
+    };
+
+    let deleteUser = (e) => {
+        let id = $(e.target).parents('.card').attr("id");
+
+        $.ajax({
+            url: `api/v1/users/${id}`,
+            type:"DELETE",
+            success: function() {
+                $('#users').html('');
+                getCard();
+            }
+        });
+    };
+
+    let addUser = (e) => {
+
+        let name = $(e.target).parents('.card').find('input').val();
+
+        $.ajax({
+            url: `api/v1/users/`,
+            type:"POST",
+            data:{name},
+            success: function(data) {
+               $('#users').html('');
+               getCard();
+            }
+        });
+    };
+
+    let editUser = (id, name) => {
+        $.ajax({
+            url: `api/v1/users/${id}`,
+            type:"PUT",
+            data:{name},
+            success: function(data) {
+                $('#users').html('');
+                getCard();
+            }
+        });
+    }
+
+</script>
+</body>
+</html>
