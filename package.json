@@ -6,6 +6,6 @@
   "author": "Tikhomirov Sergey",
   "dependencies": {
     "express": "latest",
-    "mongodb": "^3.0.0-rc0"
+    "mongodb": "2.2.33"
   }
 }
