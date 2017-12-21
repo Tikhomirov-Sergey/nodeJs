@@ -1,0 +1,11 @@
+{
+  "name": "dz7",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "Tikhomirov Sergey",
+  "dependencies": {
+    "express": "latest",
+    "mongodb": "^3.0.0-rc0"
+  }
+}
